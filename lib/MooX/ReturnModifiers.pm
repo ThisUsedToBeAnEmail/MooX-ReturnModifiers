@@ -4,20 +4,16 @@ use strict;
 use warnings;
 use Carp qw/croak/;
 
-our $VERSION = '0.08';
+our $VERSION = '1.000000';
 
 use Exporter 'import';
 
 our @EXPORT = qw/return_modifiers/;
-our @EXPORT_OK =
-  qw/return_modifiers return_has return_with return_around return_extends return_before return_after/;
-
-our $moo_modifiers;
-BEGIN { $moo_modifiers = [qw/has with around extends before after/] }
+our @EXPORT_OK = qw/return_modifiers return_has return_with return_around return_extends return_before return_after/;
 
 sub return_modifiers {
     my %modifiers = ();
-    $_[1] //= $moo_modifiers;
+    $_[1] ||= [qw/has with around extends before after/];
     for ( @{ $_[1] } ) {
         unless ( $modifiers{$_} = $_[0]->can($_) ) {
             croak "Can't find method <$_> in <$_[0]>";
@@ -26,35 +22,21 @@ sub return_modifiers {
     return $_[2] ? \%modifiers : %modifiers;
 }
 
-sub return_has {
-    my %mod = return_modifiers( $_[0], [qw/has/] );
-    return $mod{has};
-}
+sub return_has {return_modifiers($_[0], [qw/has/], 1)->{has}}
 
-sub return_with {
-    my %mod = return_modifiers( $_[0], [qw/with/] );
-    return $mod{with};
-}
+sub return_with {return_modifiers($_[0], [qw/with/], 1)->{with}}
 
-sub return_around {
-    my %mod = return_modifiers( $_[0], [qw/around/] );
-    return $mod{around};
-}
+sub return_after {return_modifiers($_[0], [qw/after/], 1)->{after}}
 
-sub return_extends {
-    my %mod = return_modifiers( $_[0], [qw/extends/] );
-    return $mod{extends};
-}
+sub return_before {return_modifiers($_[0], [qw/before/], 1)->{before}}
 
-sub return_before {
-    my %mod = return_modifiers( $_[0], [qw/before/] );
-    return $mod{before};
-}
+sub return_around {return_modifiers($_[0], [qw/around/], 1)->{around}}
 
-sub return_after {
-    my %mod = return_modifiers( $_[0], [qw/after/] );
-    return $mod{after};
-}
+sub return_extends {return_modifiers($_[0], [qw/extends/], 1)->{extends}}
+
+1;
+
+__END__
 
 =head1 NAME
 
@@ -62,7 +44,7 @@ MooX::ReturnModifiers - Returns Moo Modifiers as a Hash
 
 =head1 VERSION
 
-Version 0.08
+Version 1.000000
 
 =head1 SYNOPSIS
 
@@ -215,7 +197,4 @@ CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 =cut
-
-1;    # End of MooX::ReturnModifiers
